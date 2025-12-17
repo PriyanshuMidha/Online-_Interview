@@ -6,38 +6,37 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import { connectDB } from "./lib/db.js";  
- 
 
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT||3001;
+const PORT = process.env.PORT || 3001;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Middleware
-app.use(cors());
+// 🔥 MIDDLEWARE (ORDER MATTERS)
+app.use(
+  cors({
+    origin: "http://localhost:3000", // frontend URL
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 app.use(cookieParser());
 
-// ---- FIX: Correct path to dist ----
+// Serve frontend build
 const distPath = path.join(__dirname, "../../Frontend/dist");
-
-// Serve static files
 app.use(express.static(distPath));
 
-// API test route
+// Health check
 app.get("/health", (req, res) => {
   res.json({ message: "backend working" });
 });
 
+// Routes
 app.use("/api/auth", authRoute);
-
-// SPA fallback for Vite (Express 5)
-// app.use((req, res) => {
-//   res.sendFile(path.join(distPath, "index.html"));
-// });
 
 
 // Start server
